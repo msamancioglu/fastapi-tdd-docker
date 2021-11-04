@@ -1,12 +1,22 @@
 # project/app/main.py
-
-
+import os
 from fastapi import FastAPI, Depends
+from tortoise.contrib.fastapi import register_tortoise
 
-from config import get_settings, Settings
+from .config import get_settings, Settings
 
 
 app = FastAPI()
+
+
+register_tortoise(
+    app,
+    # db_url=os.environ.get("DATABASE_URL"),
+    db_url=os.environ.get("DATABASE_URL"),
+    modules={"models": ["app.models.tortoise"]},
+    generate_schemas=True,
+    add_exception_handlers=True,
+)
 
 
 @app.get("/ping")
@@ -17,9 +27,4 @@ async def pong(settings: Settings = Depends(get_settings)):
         "testing": settings.testing
     }
 
-import uvicorn
-import os
-if __name__ == "__main__":
-    run_base = f"{os.path.basename(__file__).split('.')[0]}:app"
-    print(run_base)
-    uvicorn.run(run_base, reload=True)
+
